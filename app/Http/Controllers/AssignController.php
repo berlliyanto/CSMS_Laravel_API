@@ -173,7 +173,24 @@ class AssignController extends Controller
     }
 
 
-    public function destroy(Request $request)
+    public function destroyAssignWithTasks($id)
     {
+        DB::beginTransaction();
+
+        try {
+            Assign::where('id', $id)->delete();
+            Task::where('assign_id', $id)->delete();
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Data deleted successfully',
+            ]);
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'message' => $th->getMessage()
+            ], 500);
+        }
     }
 }

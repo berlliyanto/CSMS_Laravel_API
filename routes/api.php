@@ -51,6 +51,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/assigns', [AssignController::class, 'index']);
     Route::get('/assign/{id}', [AssignController::class, 'show']);
     Route::get('/assigns_by_leader', [AssignController::class, 'assignByLeader'])->middleware('must.leader');
+    Route::delete('/delete_assign_with_tasks/{id}', [AssignController::class, 'destroyAssignWithTasks'])->middleware('must.leader');
+    Route::put('/update_assign_with_tasks/{id}', [AssignController::class, 'updateAssignWithTasks'])->middleware('must.leader');
     Route::put('/update_by_supervisor/{id}', [AssignController::class, 'updateBySupervisor'])->middleware('must.supervisor');
     Route::put('/update_by_danone/{id}', [AssignController::class, 'updateByDanone'])->middleware('must.danone');
 
