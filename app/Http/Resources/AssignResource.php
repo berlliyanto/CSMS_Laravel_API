@@ -25,10 +25,16 @@ class AssignResource extends JsonResource
                 return [
                     "id" => $this->area->id,
                     "area_name" => $this->area->area_name,
-                    "location" => $this->area->location
+                ];
+            }),
+            "location" => $this->whenLoaded("area", function(){
+                return [
+                    "id" => $this->area->location->id,
+                    "location_name" => $this->area->location->location_name
                 ];
             }),
             "tasks" => $tasks,
+            "tasks_detail" => $this->whenLoaded('tasks'),
             "supervisor_id" => $this->whenLoaded('supervisor'),
             "checked_supervisor_at" => $this->checked_supervisor_at,
             "checked_danone_at" => $this->checked_danone_at,

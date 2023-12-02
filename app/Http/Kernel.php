@@ -2,7 +2,9 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\MustDanone;
 use App\Http\Middleware\MustLeader;
+use App\Http\Middleware\MustSupervisor;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -65,6 +67,8 @@ class Kernel extends HttpKernel
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        'must.leader' => MustLeader::class
+        'must.leader' => MustLeader::class,
+        'must.supervisor' => MustSupervisor::class,
+        'must.danone' => MustDanone::class,
     ];
 }

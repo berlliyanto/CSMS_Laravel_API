@@ -50,9 +50,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     //Assign Task
     Route::get('/assigns', [AssignController::class, 'index']);
     Route::get('/assign/{id}', [AssignController::class, 'show']);
+    Route::get('/assigns_by_leader', [AssignController::class, 'assignByLeader'])->middleware('must.leader');
+    Route::put('/update_by_supervisor/{id}', [AssignController::class, 'updateBySupervisor'])->middleware('must.supervisor');
+    Route::put('/update_by_danone/{id}', [AssignController::class, 'updateByDanone'])->middleware('must.danone');
 
     //Task
-    Route::post('/assign_task', [TaskController::class, 'StoreWithAssignsTable'])->middleware('must.leader');
+    Route::post('/assign_task', [TaskController::class, 'storeTasksWithAssign'])->middleware('must.leader');
     Route::get('/tasks', [TaskController::class, 'index'])->middleware('must.leader');
     Route::get('/task/{id}', [TaskController::class, 'show']);
     Route::get('/tasks_by_cleaner', [TaskController::class, 'tasksByCleaner']);

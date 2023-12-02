@@ -31,6 +31,7 @@ class TaskController extends Controller
             'message' => $message,
             'data' => $data,
         ], 200);
+
     }
 
     public function show($id)
@@ -68,11 +69,11 @@ class TaskController extends Controller
         $groupedTasks = $tasks->groupBy('status');
 
         $formattedData = [];
-        foreach ($groupedTasks as $status => $tasks) {
+        foreach ($groupedTasks as $status => $task) {
             $formattedData[] = [
                 'status' => $status,
-                'count' => $tasks->count(),
-                'tasks' => TaskResource::collection($tasks),
+                'count' => $task->count(),
+                'tasks' => TaskResource::collection($task->take(10)),
             ];
         }
 
@@ -124,12 +125,11 @@ class TaskController extends Controller
         ], 200);
     }
 
-    public function StoreWithAssignsTable(Request $request)
+    public function storeTasksWithAssign(Request $request)
     {
         $request->validate([
             "area_id" => "required|exists:areas,id",
             "cleaners" => "required|array",
-            // "cleaners.*" => "required|exists:cleaners,id",
             "task" => "required",
         ]);
 

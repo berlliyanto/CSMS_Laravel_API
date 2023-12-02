@@ -13,7 +13,8 @@ class Assign extends Model
         'assign_by', 'area_id',
         'task', 'supervisor_id',
         'checked_supervisor_at',
-        'checked_danone_at'
+        'verified_danone_at',
+        
     ];
 
     public function assignBy(){
@@ -26,5 +27,9 @@ class Assign extends Model
 
     public function supervisor(){
         return $this->belongsTo(User::class, 'supervisor_id', 'id');
+    }
+
+    public function tasks(){
+        return $this->hasMany(Task::class, 'assign_id', 'id');
     }
 }
