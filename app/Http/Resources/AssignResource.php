@@ -34,7 +34,12 @@ class AssignResource extends JsonResource
                 ];
             }),
             "tasks" => $tasks,
-            "tasks_detail" => $this->whenLoaded('tasks'),
+            "tasks_detail" => $this->whenLoaded('tasks', function(){
+                return collect($this->tasks)->each(function($task){
+                    $task->cleaner;
+                    return $task;
+                });
+            }),
             "supervisor_id" => $this->whenLoaded('supervisor'),
             "checked_supervisor_at" => $this->checked_supervisor_at,
             "checked_danone_at" => $this->checked_danone_at,

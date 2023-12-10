@@ -10,17 +10,17 @@ use Illuminate\Support\Facades\Response;
 
 class ImageController extends Controller
 {
-    public function show($name)
+    public function show($file)
     {
-        $path = public_path('storage/images/' . $name);
+        $path = public_path('storage/images/' . $file);
 
         if (!File::exists($path)) {
             abort(404);
         }
 
-        $file = File::get($path);
+        $files = File::get($path);
         $type = File::mimeType($path);
-        $response = Response::make($file, 200);
+        $response = Response::make($files, 200);
         $response->header("Content-Type", $type);
 
         return $response;

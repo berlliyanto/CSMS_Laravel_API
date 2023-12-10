@@ -46,6 +46,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/assestments', [AssestmentController::class, 'store'])->middleware('must.leader');
     Route::get('/calculate_assestment/{id}', [AssestmentController::class, 'calculateAssestments'])->middleware('must.leader');
     Route::get('/calculate_assestment_cleaner/{id}', [AssestmentController::class, 'calculateAssestmentsPerCleaner'])->middleware('must.leader');
+    
 
     //Assign Task
     Route::get('/assigns', [AssignController::class, 'index']);
@@ -58,7 +59,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     //Task
     Route::post('/assign_task', [TaskController::class, 'storeTasksWithAssign'])->middleware('must.leader');
-    Route::get('/tasks', [TaskController::class, 'index'])->middleware('must.leader');
+    Route::get('/tasks', [TaskController::class, 'index']);
     Route::get('/task/{id}', [TaskController::class, 'show']);
     Route::get('/tasks_by_cleaner', [TaskController::class, 'tasksByCleaner']);
     Route::get('/show_tasks_by_cleaner/{id}/{assignId}', [TaskController::class, 'showTasksByCleaner']);
@@ -68,6 +69,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 //Image
 Route::get('/images/{file}', [ImageController::class, 'show']);
+
+//Export Excel
+Route::get('/assestments_export', [AssestmentController::class, 'exportAssestments']);
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);

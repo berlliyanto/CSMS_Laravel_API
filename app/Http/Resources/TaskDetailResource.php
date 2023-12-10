@@ -18,8 +18,8 @@ class TaskDetailResource extends JsonResource
 
         return [
             "id" => $this->id,
-            "cleaner_id" => $this->cleaner_id,
-            "assign_id" => $this->assign_id,
+            "cleaner_id" => intval($this->cleaner_id),
+            "assign_id" => intval($this->assign_id),
             "tasks" => $tasks,
             "image_before" => $this->image_before,
             "image_progress" => $this->image_progress,

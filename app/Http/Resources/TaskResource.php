@@ -18,8 +18,8 @@ class TaskResource extends JsonResource
 
         return [
             "id" => $this->id,
-            "cleaner_id" => $this->cleaner_id,
-            "assign_id" => $this->assign_id,
+            "cleaner_id" => intval($this->cleaner_id),
+            "assign_id" => intval($this->assign_id),
             "tasks" => $tasks,
             "image_before" => $this->image_before,
             "image_progress" => $this->image_progress,
@@ -40,7 +40,9 @@ class TaskResource extends JsonResource
                     "location" => [
                         "id" => $this->assign->area->location->id,
                         "location_name" => $this->assign->area->location->location_name
-                    ]
+                    ],
+                    "checked_supervisor_at" => $this->assign->checked_supervisor_at,
+                    "verified_danone_at" => $this->assign->verified_danone_at
                 ];
             }),
             "cleaner" => $this->whenLoaded('cleaner')

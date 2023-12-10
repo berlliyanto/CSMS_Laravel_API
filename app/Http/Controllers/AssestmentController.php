@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\AssestmentExport;
 use App\Http\Resources\AssestmentResource;
 use App\Models\Assestment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AssestmentController extends Controller
 {
@@ -87,5 +89,9 @@ class AssestmentController extends Controller
             "message" => "Success",
             "data" => $assestmentsStore
         ]);
+    }
+
+    public function exportAssestments(Request $request) {
+        return (new AssestmentExport($request->cleaner_id))->download('assestments.xlsx');
     }
 }

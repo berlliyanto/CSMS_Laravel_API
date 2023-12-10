@@ -6,6 +6,7 @@ use App\Http\Resources\AssignResource;
 use App\Models\Assign;
 use App\Models\Task;
 use Carbon\Carbon;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -51,8 +52,11 @@ class AssignController extends Controller
             'assignBy:id,name',
             'area:id,area_name,location_id',
             'area.location:id,location_name',
+            'supervisor:id,name',
             'tasks'
-        ])->where('assign_by', $id)->get();
+        ])->where('assign_by', $id)
+        ->whereNull('supervisor_id')
+        ->get();
 
         $data = AssignResource::collection($assigns);
 
@@ -75,13 +79,17 @@ class AssignController extends Controller
 
         try {
 
-            $updateAssign = Assign::where('id', $id)->update([
+            $updateAssign = Assign::where('id', $id)
+            ->whereNotNull('supervisor_id')
+            ->update([
                 'area_id' => $request->area_id,
                 'tasks' => $request->tasks
             ]);
 
             foreach ($request->cleaners as $key => $value) {
-                Task::where('cleaner_id', $id)->update([
+                Task::where('cleaner_id', $id)
+                ->whereNotIn('status', ['Finish', 'Not Finish'])
+                ->update([
                     'cleaner_id' => $value
                 ]);
             }
@@ -119,8 +127,8 @@ class AssignController extends Controller
 
             if (!$validStatus) {
                 return response()->json([
-                    'message' => 'Tugas belum selesai atau tidak valid, tidak dapat di verifikasi'
-                ], 200);
+                    'message' => 'Tugas yang diberi leader kepada setiap cleaner dalam 1 grup belum selesai semua'
+                ], 401);
             }
 
             $updateAssign->update([
@@ -131,11 +139,11 @@ class AssignController extends Controller
             return response()->json([
                 'message' => 'Data updated successfully',
                 'data' => $updateAssign
-            ]);
+            ], 200);
         } else {
             return response()->json([
                 'message' => 'Belum di verifikasi'
-            ], 200);
+            ], 401);
         }
     }
 

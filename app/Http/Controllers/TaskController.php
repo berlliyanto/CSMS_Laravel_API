@@ -16,7 +16,7 @@ class TaskController extends Controller
     public function index()
     {
         $tasks = Task::with([
-            'assign:id,assign_by,area_id,task',
+            'assign:id,assign_by,area_id,task,checked_supervisor_at,verified_danone_at',
             'cleaner:id,name',
             'assign.assignBy:id,name',
             'assign.area:id,area_name,location_id',
