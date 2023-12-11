@@ -109,6 +109,22 @@ class AssignController extends Controller
         }
     }
 
+    public function indexBySupervisor()
+    {
+        $assigns = Assign::with([
+            'assignBy:id,name',
+            'area:id,area_name,location_id',
+            'area.location:id,location_name',
+            'supervisor:id,name',
+            'tasks'
+        ])->whereNull('supervisor_id')->get();
+
+        return AssignResource::collection($assigns)->additional([
+            'success' => true,
+            'message' => 'Data fetched successfully',
+        ]);
+    }
+
     public function updateBySupervisor(Request $request, $id)
     {
         $request->validate([
