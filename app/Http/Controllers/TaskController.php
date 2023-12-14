@@ -16,12 +16,12 @@ class TaskController extends Controller
     public function index()
     {
         $tasks = Task::with([
-            'assign:id,assign_by,area_id,task,checked_supervisor_at,verified_danone_at',
+            'assign',
             'cleaner:id,name',
             'assign.assignBy:id,name',
             'assign.area:id,area_name,location_id',
             'assign.area.location:id,location_name',
-        ])->get();
+        ])->orderBy('id', 'desc')->get();
 
         $message = 'Data retrieved successfully';
 
@@ -31,13 +31,12 @@ class TaskController extends Controller
             'message' => $message,
             'data' => $data,
         ], 200);
-
     }
 
     public function show($id)
     {
         $tasks = Task::with([
-            'assign:id,assign_by,area_id,task',
+            'assign',
             'cleaner:id,name',
             'assign.assignBy:id,name',
             'assign.area:id,area_name,location_id',
@@ -59,7 +58,7 @@ class TaskController extends Controller
         $id = Auth::user()->id;
 
         $tasks = Task::with([
-            'assign:id,assign_by,area_id,task',
+            'assign',
             'cleaner:id,name',
             'assign.assignBy:id,name',
             'assign.area:id,area_name,location_id',
@@ -98,7 +97,7 @@ class TaskController extends Controller
         }
 
         $data = new TaskResource($tasks->loadMissing([
-            'assign:id,assign_by,area_id,task',
+            'assign',
             'cleaner:id,name',
             'assign.assignBy:id,name',
             'assign.area:id,area_name,location_id',
@@ -182,7 +181,7 @@ class TaskController extends Controller
     public function updateFinishTask(Request $request, $id)
     {
         $request->validate([
-            "status" => "required|in:Finish,Not Finish",
+            "status" => "required",
         ]);
 
         if ($request->status == "Not Finish") {
@@ -219,7 +218,7 @@ class TaskController extends Controller
         }
 
         $task = Task::where('id', $id);
-        $updateTask = $task->update([
+        $task->update([
             "image_before" => $newImageBefore,
             "image_finish" => $newImageFinish,
             "image_progress" => $newImageProgress,
@@ -228,7 +227,8 @@ class TaskController extends Controller
             "catatan" => $request->catatan,
         ]);
 
-        return response()->json(["message" => "success", "data" => $updateTask], 200);
+        $updatedTask = Task::find($id);
+        return response()->json(["message" => "success", "data" => $updatedTask], 200);
     }
 
     function generateRandomString($length = 30)

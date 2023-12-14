@@ -18,6 +18,15 @@ class Assign extends Model
         
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            $model->code_cs = 'CS' . str_pad(self::max('id') + 1, 7, '0', STR_PAD_LEFT);
+        });
+    }
+
     public function assignBy(){
         return $this->belongsTo(User::class, 'assign_by', 'id');
     }

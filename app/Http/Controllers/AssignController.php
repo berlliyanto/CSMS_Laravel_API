@@ -20,7 +20,7 @@ class AssignController extends Controller
             'area:id,area_name,location_id',
             'supervisor:id,name',
             'tasks'
-        ])->get();
+        ])->orderBy('id', 'desc')->get();
 
         return AssignResource::collection($assigns)->additional([
             'success' => true,

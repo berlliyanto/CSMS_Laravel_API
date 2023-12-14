@@ -32,6 +32,7 @@ class TaskResource extends JsonResource
             "assign" => $this->whenLoaded('assign', function(){
                 return [
                     "id" => $this->assign->id,
+                    "code_cs" => $this->assign->code_cs,
                     "assign_by" => $this->assign->assignBy,
                     "area" => [
                         "id" => $this->assign->area->id,
