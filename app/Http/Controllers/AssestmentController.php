@@ -13,7 +13,7 @@ class AssestmentController extends Controller
 {
     public function index()
     {
-        $assestments = Assestment::with(['leaders:id,name', 'cleaners:id,name', 'locations:id,location_name'])->get();
+        $assestments = Assestment::with(['leaders:id,name', 'cleaners:id,name', 'locations:id,location_name'])->orderBy('id', 'desc')->get();
         return response()->json([
             'message' => 'Success',
             'data' => $assestments
@@ -39,7 +39,8 @@ class AssestmentController extends Controller
 
     public function calculateAssestmentsPerCleaner($id)
     {
-        $assestment = Assestment::with(['leaders:id,name', 'cleaners:id,name', 'locations:id,location_name'])->where('cleaner', $id)->get();
+        $assestment = Assestment::with(['leaders:id,name', 'cleaners:id,name', 'locations:id,location_name'])->where('cleaner', $id)
+        ->orderBy('id', 'desc')->get();
 
         if (!$assestment) {
             return response()->json([
@@ -91,7 +92,8 @@ class AssestmentController extends Controller
         ]);
     }
 
-    public function exportAssestments(Request $request) {
+    public function exportAssestments(Request $request)
+    {
         return (new AssestmentExport($request->cleaner_id))->download('assestments.xlsx');
     }
 }

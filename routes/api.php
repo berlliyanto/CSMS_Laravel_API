@@ -30,6 +30,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     //Auth
     Route::get('/logout', [AuthController::class, 'logout']);
     Route::get('/profile', [AuthController::class, 'profile']);
+    Route::put('/update_password', [AuthController::class, 'updatePassword']);
 
     //Cleaners
     Route::get('/all_cleaners', [CleanerController::class, 'index']);
@@ -51,12 +52,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     //Assign Task
     Route::get('/assigns', [AssignController::class, 'index']);
     Route::get('/assign/{id}', [AssignController::class, 'show']);
-    Route::get('/assigns_by_leader', [AssignController::class, 'assignByLeader'])->middleware('must.leader');
+    Route::get('/index_assign_leader', [AssignController::class, 'indexByLeader'])->middleware('must.leader');
     Route::delete('/delete_assign_with_tasks/{id}', [AssignController::class, 'destroyAssignWithTasks'])->middleware('must.leader');
     Route::put('/update_assign_with_tasks/{id}', [AssignController::class, 'updateAssignWithTasks'])->middleware('must.leader');
-    Route::get('/index_by_supervisor', [AssignController::class, 'indexBySupervisor'])->middleware('must.supervisor');
-    Route::put('/update_by_supervisor/{id}', [AssignController::class, 'updateBySupervisor'])->middleware('must.supervisor');
-    Route::put('/update_by_danone/{id}', [AssignController::class, 'updateByDanone'])->middleware('must.danone');
+    Route::get('/index_assign_supervisor', [AssignController::class, 'indexBySupervisor'])->middleware('must.supervisor');
+    Route::put('/update_assign_supervisor/{id}', [AssignController::class, 'updateBySupervisor'])->middleware('must.supervisor');
+    Route::put('/update_assign_danone/{id}', [AssignController::class, 'updateByDanone'])->middleware('must.danone');
     
     //Task
     Route::post('/assign_task', [TaskController::class, 'storeTasksWithAssign'])->middleware('must.leader');
@@ -70,6 +71,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 //Image
 Route::get('/images/{file}', [ImageController::class, 'show']);
+
+//http://192.168.100.160:8080/api/assign_filter?type=daily&start_date=2023-12-16&end_date=2023-12-17
+Route::get('/assign_filter', [AssignController::class, 'filterByDate']);
+
+Route::get('/assign_count', [AssignController::class, 'countAssign']);
 
 //Export Excel
 Route::get('/assestments_export', [AssestmentController::class, 'exportAssestments']);

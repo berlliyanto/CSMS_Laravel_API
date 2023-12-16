@@ -78,4 +78,26 @@ class AuthController extends Controller
             "data" => $userData,
         ]);
     }
+
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            "password" => "required",
+        ]);
+
+        $user = Auth::user();
+        $updatePass  = User::where('id', $user->id)->update([
+            'password' => bcrypt($request->password)
+        ]);
+
+        if($updatePass){
+            return response()->json([
+                "message" => "Berhasil ubah password",
+            ]);
+        }else{
+            return response()->json([
+                "message" => "Gagal ubah password"
+            ]);
+        }
+    }
 }

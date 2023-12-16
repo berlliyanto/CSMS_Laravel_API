@@ -25,4 +25,12 @@ class ImageController extends Controller
 
         return $response;
     }
+
+    public function tes(Request $request)
+    {
+        $query = $request->query('query');
+        return response()->json([
+            'query' => $query
+        ]);
+    }
 }

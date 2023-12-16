@@ -44,7 +44,7 @@ class AssignController extends Controller
         ]));
     }
 
-    public function assignByLeader()
+    public function indexByLeader()
     {
         $id = Auth::user()->id;
 
@@ -55,8 +55,9 @@ class AssignController extends Controller
             'supervisor:id,name',
             'tasks'
         ])->where('assign_by', $id)
-        ->whereNull('supervisor_id')
-        ->get();
+            ->whereNull('supervisor_id')
+            ->orderBy('id', 'desc')
+            ->get();
 
         $data = AssignResource::collection($assigns);
 
@@ -80,27 +81,26 @@ class AssignController extends Controller
         try {
 
             $updateAssign = Assign::where('id', $id)
-            ->whereNotNull('supervisor_id')
-            ->update([
-                'area_id' => $request->area_id,
-                'tasks' => $request->tasks
-            ]);
+                ->whereNotNull('supervisor_id')
+                ->update([
+                    'area_id' => $request->area_id,
+                    'tasks' => $request->tasks
+                ]);
 
             foreach ($request->cleaners as $key => $value) {
                 Task::where('cleaner_id', $id)
-                ->whereNotIn('status', ['Finish', 'Not Finish'])
-                ->update([
-                    'cleaner_id' => $value
-                ]);
+                    ->whereNotIn('status', ['Finish', 'Not Finish'])
+                    ->update([
+                        'cleaner_id' => $value
+                    ]);
             }
 
             DB::commit();
-    
+
             return response()->json([
                 'message' => 'Data updated successfully',
                 'data' => $updateAssign
             ]);
-            
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
@@ -117,7 +117,10 @@ class AssignController extends Controller
             'area.location:id,location_name',
             'supervisor:id,name',
             'tasks'
-        ])->whereNull('supervisor_id')->get();
+        ])
+            ->whereNull('supervisor_id')
+            ->orderBy('id', 'desc')
+            ->get();
 
         return AssignResource::collection($assigns)->additional([
             'success' => true,
@@ -175,7 +178,7 @@ class AssignController extends Controller
             $time = Carbon::now();
             $updateAssign = Assign::findOrFail($id);
 
-            if($updateAssign->supervisor_id == null){
+            if ($updateAssign->supervisor_id == null) {
                 return response()->json([
                     'message' => 'Belum ada supervisor'
                 ], 401);
@@ -196,7 +199,6 @@ class AssignController extends Controller
         }
     }
 
-
     public function destroyAssignWithTasks($id)
     {
         DB::beginTransaction();
@@ -209,12 +211,57 @@ class AssignController extends Controller
             return response()->json([
                 'message' => 'Data deleted successfully',
             ]);
-
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
                 'message' => $th->getMessage()
             ], 500);
         }
+    }
+
+    public function filterByDate(Request $request)
+    {
+        $dateType = $request->query('type'); // daily, monthly, yearly
+        $startDate = $request->query('start_date'); // start date for filtering
+        $endDate = $request->query('end_date'); // end date for filtering
+
+        $tasks = Assign::with([
+            'assignBy:id,name',
+            'area:id,area_name,location_id',
+            'area.location:id,location_name',
+            'supervisor:id,name',
+            'tasks'
+        ])->when($dateType === 'daily', function ($query) use ($startDate) {
+                return $query->whereDate('created_at', $startDate);
+            })
+            ->when($dateType === 'monthly', function ($query) use ($startDate, $endDate) {
+                return $query->whereBetween('created_at', [$startDate, $endDate]);
+            })
+            ->when($dateType === 'yearly', function ($query) use ($startDate) {
+                return $query->whereYear('created_at', $startDate);
+            })
+            ->orderBy('id', 'desc')->get();
+
+        $taskResource = AssignResource::collection($tasks)->additional([
+            'success' => true,
+            'message' => 'Data fetched successfully',
+        ]);
+
+        return $taskResource;
+    }
+
+    public function countAssign()
+    {
+        $total = Assign::count();
+        $totalFinish = Assign::whereNotNull('verified_danone_at')->count();
+        $totalNotFinish = Assign::whereNull('verified_danone_at')->count();
+        return response()->json([
+            'message' => 'Data fetched successfully',
+            'data' => [
+                "total" => $total,
+                "total_finish" => $totalFinish,
+                "total_not_finish" => $totalNotFinish
+            ]
+        ], 200);
     }
 }

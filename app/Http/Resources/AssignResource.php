@@ -43,7 +43,7 @@ class AssignResource extends JsonResource
             }),
             "supervisor_id" => $this->whenLoaded('supervisor'),
             "checked_supervisor_at" => $this->checked_supervisor_at,
-            "checked_danone_at" => $this->checked_danone_at,
+            "verified_danone_at" => $this->verified_danone_at,
             "created_at" => date_format($this->created_at, "Y-m-d H:i:s"),
             "updated_at" => date_format($this->updated_at, "Y-m-d H:i:s"),
         ];

@@ -6,6 +6,7 @@ use App\Http\Resources\TaskDetailResource;
 use App\Http\Resources\TaskResource;
 use App\Models\Assign;
 use App\Models\Task;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -63,7 +64,10 @@ class TaskController extends Controller
             'assign.assignBy:id,name',
             'assign.area:id,area_name,location_id',
             'assign.area.location:id,location_name',
-        ])->where('cleaner_id', $id)->get();
+        ])
+        ->where('cleaner_id', $id)
+        ->orderBy('id', 'desc')
+        ->get();
 
         $groupedTasks = $tasks->groupBy('status');
 
@@ -196,13 +200,13 @@ class TaskController extends Controller
 
         if ($request->image_before && $request->image_finish && $request->image_progress) {
             $request->validate([
-                "image_before" => "image|mimes:jpeg,png,jpg,gif|max:4048",
-                "image_finish" => "image|mimes:jpeg,png,jpg,gif|max:4048",
-                "image_progress" => "image|mimes:jpeg,png,jpg,gif|max:4048"
+                "image_before" => "image|mimes:jpeg,png,jpg,gif",
+                "image_finish" => "image|mimes:jpeg,png,jpg,gif",
+                "image_progress" => "image|mimes:jpeg,png,jpg,gif"
             ]);
-            $imageBefore = $this->generateRandomString();
-            $imageFinish = $this->generateRandomString();
-            $imageProgress = $this->generateRandomString();
+            $imageBefore = "before_" . Carbon::now()->format('Y-m-d-H-i-s');
+            $imageFinish = "finish_" . Carbon::now()->format('Y-m-d-H-i-s');
+            $imageProgress = "progress_" . Carbon::now()->format('Y-m-d-H-i-s');
 
             $extensionBefore = $request->image_before->extension();
             $extensionFinish = $request->image_finish->extension();
@@ -230,6 +234,7 @@ class TaskController extends Controller
         $updatedTask = Task::find($id);
         return response()->json(["message" => "success", "data" => $updatedTask], 200);
     }
+
 
     function generateRandomString($length = 30)
     {
