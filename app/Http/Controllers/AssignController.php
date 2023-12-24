@@ -25,7 +25,7 @@ class AssignController extends Controller
         return AssignResource::collection($assigns)->additional([
             'success' => true,
             'message' => 'Data fetched successfully',
-        ]);
+        ], 200);
     }
 
     public function show($id)
@@ -147,7 +147,7 @@ class AssignController extends Controller
             if (!$validStatus) {
                 return response()->json([
                     'message' => 'Tugas yang diberi leader kepada setiap cleaner dalam 1 grup belum selesai semua'
-                ], 401);
+                ], 400);
             }
 
             $updateAssign->update([
@@ -162,11 +162,28 @@ class AssignController extends Controller
         } else {
             return response()->json([
                 'message' => 'Belum di verifikasi'
-            ], 401);
+            ], 400);
         }
     }
 
+    public function indexByDanone()
+    {
+        $assigns = Assign::with([
+            'assignBy:id,name',
+            'area:id,area_name,location_id',
+            'area.location:id,location_name',
+            'supervisor:id,name',
+            'tasks'
+        ])
+            ->whereNull('verified_danone_at')
+            ->orderBy('id', 'desc')
+            ->get();
 
+        return AssignResource::collection($assigns)->additional([
+            'success' => true,
+            'message' => 'Data fetched successfully',
+        ]);
+    }
 
     public function updateByDanone(Request $request, $id)
     {
@@ -180,8 +197,8 @@ class AssignController extends Controller
 
             if ($updateAssign->supervisor_id == null) {
                 return response()->json([
-                    'message' => 'Belum ada supervisor'
-                ], 401);
+                    'message' => 'Belum verifikasi supervisor'
+                ], 400);
             }
 
             $updateAssign->update([
@@ -195,7 +212,7 @@ class AssignController extends Controller
         } else {
             return response()->json([
                 'message' => 'Belum di verifikasi'
-            ], 200);
+            ], 400);
         }
     }
 
@@ -210,13 +227,29 @@ class AssignController extends Controller
 
             return response()->json([
                 'message' => 'Data deleted successfully',
-            ]);
+            ],200);
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
                 'message' => $th->getMessage()
             ], 500);
         }
+    }
+
+    public function updateTaskAssign(Request $request, $id)
+    {
+        $request->validate([
+            'task' => 'required'
+        ]);
+
+        $updateAssign = Assign::where('id', $id)->update([
+            'task' => $request->task
+        ]);
+
+        return response()->json([
+            'message' => 'Data updated successfully',
+            'data' => $updateAssign
+        ], 200);
     }
 
     public function filterByDate(Request $request)
@@ -231,13 +264,13 @@ class AssignController extends Controller
             'area.location:id,location_name',
             'supervisor:id,name',
             'tasks'
-        ])->when($dateType === 'daily', function ($query) use ($startDate) {
+        ])->when($dateType === 'Harian', function ($query) use ($startDate) {
                 return $query->whereDate('created_at', $startDate);
             })
-            ->when($dateType === 'monthly', function ($query) use ($startDate, $endDate) {
+            ->when($dateType === 'Bulanan', function ($query) use ($startDate, $endDate) {
                 return $query->whereBetween('created_at', [$startDate, $endDate]);
             })
-            ->when($dateType === 'yearly', function ($query) use ($startDate) {
+            ->when($dateType === 'Tahunan', function ($query) use ($startDate) {
                 return $query->whereYear('created_at', $startDate);
             })
             ->orderBy('id', 'desc')->get();
@@ -252,9 +285,25 @@ class AssignController extends Controller
 
     public function countAssign()
     {
+        $user = Auth::user();
+
+        if($user->role_id == 3){
+            $total = Assign::count();
+            $totalFinish = Assign::whereNotNull('verified_danone_at')->count();
+            $totalNotFinish = Assign::whereNull('verified_danone_at')->count();
+            return response()->json([
+                'message' => 'Data fetched successfully',
+                'data' => [
+                    "total" => $total,
+                    "total_finish" => $totalFinish,
+                    "total_not_finish" => $totalNotFinish
+                ]
+            ], 200);
+        }
+
         $total = Assign::count();
-        $totalFinish = Assign::whereNotNull('verified_danone_at')->count();
-        $totalNotFinish = Assign::whereNull('verified_danone_at')->count();
+        $totalFinish = Assign::whereNotNull('checked_supervisor_at')->count();
+        $totalNotFinish = Assign::whereNull('checked_supervisor_at')->count();
         return response()->json([
             'message' => 'Data fetched successfully',
             'data' => [

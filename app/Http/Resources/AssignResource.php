@@ -41,6 +41,11 @@ class AssignResource extends JsonResource
                     return $task;
                 });
             }),
+            "status" => $this->whenLoaded('tasks', function(){
+                return $this->tasks->every(function ($task) {
+                    return in_array($task->status, ['Finish', 'Not Finish']);
+                });
+            }),
             "supervisor_id" => $this->whenLoaded('supervisor'),
             "checked_supervisor_at" => $this->checked_supervisor_at,
             "verified_danone_at" => $this->verified_danone_at,

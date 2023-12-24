@@ -14,8 +14,10 @@ class AuthController extends Controller
     {
         $request->validate([
             'username' => 'required',
-            'password' => 'required'
+            'password' => 'required',
+            'fcm_token' => 'nullable'
         ]);
+
 
         $user = User::where('username', $request->username)->first();
 
@@ -25,8 +27,12 @@ class AuthController extends Controller
             ]);
         }
 
+        
         $token = $user->createToken($user->username . "_token")->plainTextToken;
-
+        
+        if($request->filled('fcm_token')){
+            $user->update(['fcm_token' => $request->fcm_token]);
+        }
         return [
             'token' => $token
         ];

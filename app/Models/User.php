@@ -22,7 +22,8 @@ class User extends Authenticatable
         'email',
         'password',
         'username',
-        'role_id'
+        'role_id',
+        'fcm_token'
     ];
 
     /**
@@ -33,6 +34,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'fcm_token'
     ];
 
     /**
@@ -48,5 +50,15 @@ class User extends Authenticatable
     public function role()
     {
         return $this->belongsTo(Role::class, 'role_id', 'id');
+    }
+
+    /**
+     * Specifies the user's FCM tokens
+     *
+     * @return string|array
+     */
+    public function routeNotificationForFcm()
+    {
+        return $this->fcm_token;
     }
 }

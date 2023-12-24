@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Notifications\AssignNotification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 
@@ -12,7 +14,8 @@ class ImageController extends Controller
 {
     public function show($file)
     {
-        $path = public_path('storage/images/' . $file);
+        $path = public_path('storage/images/' . $file); //-----> Use in Development
+        //$path = "/home/apli9687/public_html/storage/images/" . $file; // ----> Use in Production
 
         if (!File::exists($path)) {
             abort(404);
@@ -27,10 +30,23 @@ class ImageController extends Controller
     }
 
     public function tes(Request $request)
-    {
-        $query = $request->query('query');
+    {   
+        $user = User::where('id', $request->id)->first();
+        $user->notify(new AssignNotification("CSMS Tugas","test notification"));
         return response()->json([
-            'query' => $query
+            'query' => $user
         ]);
+    }
+
+    public function downloadFile($file) {
+
+        $path = public_path('storage/images/' . $file); // -----> Use in Development
+        //$path = "/home/apli9687/public_html/storage/images/" . $file; // ----> Use in Production
+
+        if (!File::exists($path)) {
+            abort(404);
+        }
+
+        return response()->download($path);
     }
 }

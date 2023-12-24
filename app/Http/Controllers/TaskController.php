@@ -235,15 +235,35 @@ class TaskController extends Controller
         return response()->json(["message" => "success", "data" => $updatedTask], 200);
     }
 
-
-    function generateRandomString($length = 30)
+    public function countTask()
     {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $charactersLength = strlen($characters);
-        $randomString = '';
-        for ($i = 0; $i < $length; $i++) {
-            $randomString .= $characters[random_int(0, $charactersLength - 1)];
+        $user = Auth::user();
+
+        if($user->role_id == 6){
+            $task = Task::where('cleaner_id', $user->id)->count();
+            $taskFinish = Task::where('cleaner_id', $user->id)->where('status', 'Finish')->count();
+            $taskNotFinish = Task::where('cleaner_id', $user->id)->where('status', 'Not Finish')->count();
+            return response()->json([
+                "message" => "success", 
+                "data" => [
+                    "total" => $task,
+                    "total_finish" => $taskFinish,
+                    "total_not_finish" => $taskNotFinish
+                ]
+            ], 200);
         }
-        return $randomString;
+
+        $task = Task::count();
+        $taskFinish = Task::where('status', 'Finish')->count();
+        $taskNotFinish = Task::where('status', 'Not Finish')->count();
+        return response()->json([
+            "message" => "success", 
+            "data" => [
+                "total" => $task,
+                "total_finish" => $taskFinish,
+                "total_not_finish" => $taskNotFinish
+            ]
+        ], 200);
     }
+
 }

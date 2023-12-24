@@ -20,9 +20,9 @@ class AssestmentController extends Controller
         ]);
     }
 
-    public function calculateAssestments($id)
+    public function calculateAssestments()
     {
-        $assestment = Assestment::with(['leaders:id,name', 'cleaners:id,name', 'locations:id,location_name'])->find($id);
+        $assestment = Assestment::with(['leaders:id,name', 'cleaners:id,name', 'locations:id,location_name'])->orderBy('id', 'desc')->get();
 
         if (!$assestment) {
             return response()->json([
@@ -33,14 +33,14 @@ class AssestmentController extends Controller
 
         return response()->json([
             'message' => 'Success',
-            'data' => new AssestmentResource($assestment)
+            'data' => AssestmentResource::collection($assestment)
         ]);
     }
 
     public function calculateAssestmentsPerCleaner($id)
     {
         $assestment = Assestment::with(['leaders:id,name', 'cleaners:id,name', 'locations:id,location_name'])->where('cleaner', $id)
-        ->orderBy('id', 'desc')->get();
+            ->orderBy('id', 'desc')->get();
 
         if (!$assestment) {
             return response()->json([
@@ -90,6 +90,33 @@ class AssestmentController extends Controller
             "message" => "Success",
             "data" => $assestmentsStore
         ]);
+    }
+
+    public function filterByDate(Request $request)
+    {
+        $dateType = $request->query('type'); // daily, monthly, yearly
+        $startDate = $request->query('start_date'); // start date for filtering
+        $endDate = $request->query('end_date'); // end date for filtering
+
+        $tasks = Assestment::with(
+            ['leaders:id,name', 'cleaners:id,name', 'locations:id,location_name']
+        )->when($dateType === 'Harian', function ($query) use ($startDate) {
+            return $query->whereDate('created_at', $startDate);
+        })
+            ->when($dateType === 'Bulanan', function ($query) use ($startDate, $endDate) {
+                return $query->whereBetween('created_at', [$startDate, $endDate]);
+            })
+            ->when($dateType === 'Tahunan', function ($query) use ($startDate) {
+                return $query->whereYear('created_at', $startDate);
+            })
+            ->orderBy('id', 'desc')->get();
+
+        $taskResource = AssestmentResource::collection($tasks)->additional([
+            'success' => true,
+            'message' => 'Data fetched successfully',
+        ]);
+
+        return $taskResource;
     }
 
     public function exportAssestments(Request $request)
