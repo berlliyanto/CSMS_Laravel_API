@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\AssignExport;
 use App\Http\Resources\AssignResource;
 use App\Models\Assign;
 use App\Models\Task;
@@ -312,5 +313,18 @@ class AssignController extends Controller
                 "total_not_finish" => $totalNotFinish
             ]
         ], 200);
+    }
+
+    public function assignExport(Request $request)
+    {
+        $id = $request->query('id');
+        $startFrom = $request->query('start_date');
+        $endTo = $request->query('end_date');
+
+        if($id){
+            return (new AssignExport($id, null, null))->download('assign_single.xlsx');
+        }
+
+        return (new AssignExport(null, $startFrom, $endTo))->download('assign_multiple.xlsx');
     }
 }

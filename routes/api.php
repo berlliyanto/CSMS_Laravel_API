@@ -88,6 +88,7 @@ Route::post('/tes', [ImageController::class, 'tes']);
 
 //Export Excel
 Route::get('/assestments_export', [AssestmentController::class, 'exportAssestments']);
+Route::get('/assign_export', [AssignController::class, 'assignExport']);
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
