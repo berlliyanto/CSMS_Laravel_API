@@ -15,7 +15,7 @@ class Assign extends Model
         'task', 'supervisor_id',
         'checked_supervisor_at',
         'verified_danone_at',
-        
+
     ];
 
     protected static function boot()
@@ -23,23 +23,35 @@ class Assign extends Model
         parent::boot();
 
         static::creating(function ($model) {
-            $model->code_cs = 'CS' . str_pad(self::max('id') + 1, 7, '0', STR_PAD_LEFT);
+            $latestNotDeleted = self::orderBy('id', 'desc')->withTrashed()->first();
+
+            if ($latestNotDeleted) {
+                $latestId = $latestNotDeleted->id;
+            } else {
+                $latestId = 0;
+            }
+
+            $model->code_cs = 'CS' . str_pad($latestId + 1, 9, '0', STR_PAD_LEFT);
         });
     }
 
-    public function assignBy(){
+    public function assignBy()
+    {
         return $this->belongsTo(User::class, 'assign_by', 'id');
     }
 
-    public function area(){
+    public function area()
+    {
         return $this->belongsTo(Area::class, 'area_id', 'id');
     }
 
-    public function supervisor(){
+    public function supervisor()
+    {
         return $this->belongsTo(User::class, 'supervisor_id', 'id');
     }
 
-    public function tasks(){
+    public function tasks()
+    {
         return $this->hasMany(Task::class, 'assign_id', 'id');
     }
 }

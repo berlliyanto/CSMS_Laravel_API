@@ -41,7 +41,6 @@ class AssignNotification extends Notification
         return (new FcmMessage(notification: new FcmNotification(
             title: $this->title,
             body: $this->message,
-            image: 'https://aplikasipms.com/api/images/icon.png',
         )));
         // ->data(['data1' => 'value', 'data2' => 'value2'])
         // ->custom([

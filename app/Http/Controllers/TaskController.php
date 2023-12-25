@@ -6,6 +6,8 @@ use App\Http\Resources\TaskDetailResource;
 use App\Http\Resources\TaskResource;
 use App\Models\Assign;
 use App\Models\Task;
+use App\Models\User;
+use App\Notifications\AssignNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -140,10 +142,10 @@ class TaskController extends Controller
 
         try {
 
-            $assignBy = Auth::user()->id;
+            $assignBy = Auth::user();
 
             $assign = Assign::create([
-                "assign_by" => $assignBy,
+                "assign_by" => $assignBy->id,
                 "area_id" => $request->area_id,
                 "task" => $request->task,
             ]);
@@ -155,6 +157,8 @@ class TaskController extends Controller
                     "cleaner_id" => $value,
                     "status" => "Pending"
                 ]);
+                $cleaner = User::find($value);
+                $cleaner->notify(new AssignNotification("CSMS Tugas", "Anda Memiliki Tugas Baru Dari " . $assignBy->name . ". Silahkan Cek Tugas Anda"));
             }
 
             DB::commit();
@@ -230,6 +234,10 @@ class TaskController extends Controller
             "alasan" => $request->alasan,
             "catatan" => $request->catatan,
         ]);
+        $task = Task::with(['assign', 'cleaner'])->where('id', $id)->first();
+        $assignBy = $task->assign->assign_by;
+        $user = User::find($assignBy);
+        $user->notify(new AssignNotification("CSMS Tugas", "Tugas Dari " . $task->cleaner->name . " Sudah Selesai Dikerjakan"));
 
         $updatedTask = Task::find($id);
         return response()->json(["message" => "success", "data" => $updatedTask], 200);

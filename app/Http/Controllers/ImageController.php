@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Task;
 use App\Models\User;
 use App\Notifications\AssignNotification;
 use Illuminate\Support\Facades\Storage;
@@ -31,10 +32,12 @@ class ImageController extends Controller
 
     public function tes(Request $request)
     {   
-        $user = User::where('id', $request->id)->first();
-        $user->notify(new AssignNotification("CSMS Tugas","test notification"));
+        // $user = User::where('id', $request->id)->first();
+        // $user->notify(new AssignNotification("CSMS Tugas","test notification"));
+        $task = Task::with(['assign', 'cleaner'])->where('id', $request->id)->first();
+        $cleaner = $task->cleaner->name;
         return response()->json([
-            'query' => $user
+            'query' => $cleaner
         ]);
     }
 
