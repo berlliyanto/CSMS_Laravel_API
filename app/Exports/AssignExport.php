@@ -8,31 +8,62 @@ use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\Exportable;
+use Illuminate\Database\Eloquent\Builder;
 
 class AssignExport implements FromQuery, WithMapping, WithHeadings
 {
     use Exportable;
 
     /**
-    * @return \Illuminate\Support\Collection
-    */
+     * @return \Illuminate\Support\Collection
+     */
 
-    private $id, $from, $to;
+    private $id, $from, $to, $location, $tipe;
 
-    public function __construct($id, $from, $to)
+    public function __construct($id, $from, $to, $location, $tipe)
     {
         $this->id = $id;
         $this->from = $from;
         $this->to = $to;
+        $this->location = $location;
+        $this->tipe = $tipe;
     }
 
     public function query()
     {
-        if($this->id) {
-            return Assign::with(['assignBy', 'area', 'area.location', 'tasks'])->where('id', $this->id);
+        if ($this->id) {
+            $assigns =  Assign::with(['assignBy', 'area', 'area.location', 'tasks'])->where('id', $this->id);
+            return $assigns;
         }
 
-        return Assign::with(['assignBy', 'area', 'area.location', 'tasks'])->whereBetween('created_at', [$this->from, $this->to]);
+        if ($this->location) {
+            $query = Assign::with(['assignBy', 'area', 'area.location', 'tasks'])
+                ->whereHas('area', function (Builder $query) {
+                    $query->whereHas('location', function (Builder $query) {
+                        $query->where('id', $this->location);
+                    });
+                });
+            if ($this->tipe === 'Harian') {
+                $query->whereDate('created_at', $this->from);
+            } elseif ($this->tipe === 'Bulanan') {
+                $query->whereBetween('created_at', [$this->from, $this->to]);
+            } elseif ($this->tipe === 'Tahunan') {
+                $query->whereYear('created_at', $this->from);
+            }
+            
+            return $query->orderBy('id', 'desc');
+        }
+
+        $queryDefault = Assign::with(['assignBy', 'area', 'area.location', 'tasks']);
+        if ($this->tipe === 'Harian') {
+            $queryDefault->whereDate('created_at', $this->from);
+        } elseif ($this->tipe === 'Bulanan') {
+            $queryDefault->whereBetween('created_at', [$this->from, $this->to]);
+        } elseif ($this->tipe === 'Tahunan') {
+            $queryDefault->whereYear('created_at', $this->from);
+        }
+
+        return $queryDefault->orderBy('id', 'desc');
     }
 
     public function headings(): array

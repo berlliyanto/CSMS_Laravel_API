@@ -66,6 +66,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/assign_filter_date', [AssignController::class, 'filterByDate']);
     Route::get('/assign_count', [AssignController::class, 'countAssign']);
+    Route::get('/assign_analytics', [AssignController::class, 'assignAnalytics']);
     
     //Task
     Route::post('/assign_task', [TaskController::class, 'storeTasksWithAssign'])->middleware('must.leader');
