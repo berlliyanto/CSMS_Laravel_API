@@ -346,8 +346,8 @@ class AssignController extends Controller
         }
 
         $counts = Assign::with('tasks')
-            ->whereHas('tasks', function(Builder $query) use ($idCleaner) {
-                if($idCleaner){
+            ->whereHas('tasks', function (Builder $query) use ($idCleaner) {
+                if ($idCleaner) {
                     $query->where('cleaner_id', $idCleaner);
                 }
             })
@@ -374,6 +374,9 @@ class AssignController extends Controller
                 return $query->whereDate('created_at', $startDate);
             })
             ->when($dateType === 'Bulanan', function ($query) use ($startDate, $endDate) {
+                $endDateTime = \DateTime::createFromFormat('Y-m-d', $endDate);
+                $endDateTime->setTime(23, 59, 59);
+                $endDate = $endDateTime->format('Y-m-d H:i:s');
                 return $query->whereBetween('created_at', [$startDate, $endDate]);
             })
             ->when($dateType === 'Tahunan', function ($query) use ($startDate) {

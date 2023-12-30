@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 // php artisan serve --host 192.168.100.160 --port 8080
+// php artisan serve --host 192.168.1.12 --port 8080
 
 Route::middleware(['auth:sanctum'])->group(function () {
     //Auth

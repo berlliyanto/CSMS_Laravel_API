@@ -46,7 +46,10 @@ class AssignExport implements FromQuery, WithMapping, WithHeadings
             if ($this->tipe === 'Harian') {
                 $query->whereDate('created_at', $this->from);
             } elseif ($this->tipe === 'Bulanan') {
-                $query->whereBetween('created_at', [$this->from, $this->to]);
+                $endDateTime = \DateTime::createFromFormat('Y-m-d', $this->to);
+                $endDateTime->setTime(23, 59, 59);
+                $endDate = $endDateTime->format('Y-m-d H:i:s');
+                $query->whereBetween('created_at', [$this->from, $endDate]);
             } elseif ($this->tipe === 'Tahunan') {
                 $query->whereYear('created_at', $this->from);
             }
